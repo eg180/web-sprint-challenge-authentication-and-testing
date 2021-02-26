@@ -2,16 +2,26 @@
 const Users = require('../users/users-model.js');
 
 module.exports = (req, res, next) => {
-  const { username, password } = req.body;
-  const user = req.body 
+  const { username } = req.body;
+ 
+  console.log('inside the checkIfTaken middleware')
 
   Users.findByUsername(username)
-  if (username) {
-    res.status(401).json("Username Taken")
-  } else {
-   next()
+  .then((user) => {
+    console.log(`req.body.username: ${username}`)
+    console.log(`user.username: ${user.username}`)
+    if (req.body.username == user.username) {
+      res.status(401).json('username taken')
+    } else {
+      next()
+    }
+  })
+  .catch(e => {
+    console.log('in catch on line 20')
+    res.status(400).json(e.message)
+  })
   
-  }
+  
 
   // next();
   /*
@@ -28,19 +38,6 @@ module.exports = (req, res, next) => {
 };
 
 
-function makeJwt(user) {
-  const payload = {
-    subject: user.id,
-    username: user.username
-  };
-  const secret = process.env.JWT_SECRET || 'shhh'
-
-  const options = {
-      expiresIn: "2h",
-  }
-  return jwt.sign(payload, secret, options)
-
-};
 
 
 

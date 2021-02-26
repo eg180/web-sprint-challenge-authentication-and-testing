@@ -17,22 +17,28 @@ router.get('/users', (req, res) => {
 
 router.post('/register', checkIfTaken, (req, res) => {
   // res.end('implement register, please!');
-  const { username, password } = req.body;
   const user = req.body;
   
+  Users.add(user)
+  .then(user => {
+    res.status(200).json({ user, message: "Welcome to the Dad Joke's API!" })
+  })
+  .catch(err => {
+    res.status(401).json(err.message)
+  })
 
-  if (username && password) {
+  // if (username && password) {
 
-    Users.add(user)
-    .then(res => {
-      res.status(200).json("Welcome to the Dad Joke's API!")
-    })
-    .catch(err => {
-      res.status(401).json(err.message)
-    })
-  } else {
-    res.status(401).json('please supply both a username and password')
-  }
+  //   Users.add(user)
+  //   .then(res => {
+  //     res.status(200).json("Welcome to the Dad Joke's API!")
+  //   })
+  //   .catch(err => {
+  //     res.status(401).json(err.message)
+  //   })
+  // } else {
+  //   res.status(401).json('please supply both a username and password')
+  // }
 
 
   /*
