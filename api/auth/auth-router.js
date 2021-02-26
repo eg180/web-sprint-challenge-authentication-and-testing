@@ -1,9 +1,9 @@
-const bcryptjs = require("bcryptjs");
+const bcrypt = require("bcryptjs");
 const Users = require('../users/users-model.js');
 const router = require('express').Router();
 const jwt = require("jsonwebtoken");
 // const restricted = require('../middleware/restricted.js')
-const checkIfTaken = require('../middleware/validate.js')
+const checkIfTaken = require('../middleware/checkIfTaken.js')
 
 
 
@@ -18,6 +18,9 @@ router.get('/users', (req, res) => {
 router.post('/register', checkIfTaken, (req, res) => {
   // res.end('implement register, please!');
   const user = req.body;
+
+  const hashedPassword = bcrypt.hashSync(user.password, 8);
+  user.password = hashedPassword; // updates what the user input to the hashed version
   
   Users.add(user)
   .then(user => {
@@ -68,18 +71,20 @@ router.post('/register', checkIfTaken, (req, res) => {
 });
 
 router.post('/login', (req, res) => {
-  const { username, password } = req.body;
+  const credentials = req.body;
   
 
-  Users.findByUsername(username)
+  Users.findByUsername(credentials.username)
 
   .then(([user]) => {
-
-    if (user && password === user.password) {
+    
+   
+    // console.log(bcrypt.compareSync(credentials.password, user.password))
+    if (!user || !bcrypt.compareSync(credentials.password, user.password)) {
+      return res.status(401).json({ error: "Nice try, hacker."})
+    } else {
       const token = makeJwt(user)
       res.status(200).json({message: "Welcome to the Dad Jokes API", token})
-    } else {
-      res.status(401).json({ message: "Invalid credentials" })
     }
   })
   .catch(err => {

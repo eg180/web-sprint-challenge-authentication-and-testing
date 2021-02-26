@@ -2,24 +2,30 @@
 const Users = require('../users/users-model.js');
 
 module.exports = (req, res, next) => {
-  const { username } = req.body;
- 
-  console.log('inside the checkIfTaken middleware')
+  const { username, password } = req.body;
 
-  Users.findByUsername(username)
-  .then((user) => {
-    console.log(`req.body.username: ${username}`)
-    console.log(`user.username: ${user.username}`)
-    if (req.body.username == user.username) {
-      res.status(401).json('username taken')
-    } else {
-      next()
-    }
-  })
-  .catch(e => {
-    console.log('in catch on line 20')
-    res.status(400).json(e.message)
-  })
+  if (username && password) {
+
+    Users.findByUsername(username)
+    .then((user) => {
+
+      if (req.body.username == user.username) {
+        res.status(401).json('username taken')
+      } else {
+        next()
+      }
+    })
+    .catch(e => {
+      
+      res.status(400).json(e.message)
+    })
+  } else {
+    res.status(401).json({message: "Username and password required"})
+  }
+ 
+
+
+
   
   
 
