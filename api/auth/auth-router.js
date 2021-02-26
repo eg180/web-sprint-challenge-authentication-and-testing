@@ -1,7 +1,10 @@
-const Users = require('../users/users-model.js');
 
+const Users = require('../users/users-model.js');
 const router = require('express').Router();
-// const Users = require('../')
+// const restricted = require('../middleware/restricted.js')
+const validateExistingUser = require('../middleware/validate.js')
+
+
 
 
 router.get('/users', (req, res) => {
@@ -17,14 +20,20 @@ router.post('/register', (req, res) => {
   const user = req.body;
   console.log(user);
 
-  Users.add(user)
+  if (username && password) {
 
-  .then(res => {
-    res.status(200).json("Welcome to the Dad Joke's API!")
-  })
-  .catch(err => {
-    res.status(401).json(err.message)
-  })
+    Users.add(user)
+    .then(res => {
+      res.status(200).json("Welcome to the Dad Joke's API!")
+    })
+    .catch(err => {
+      res.status(401).json(err.message)
+    })
+  } else {
+    res.status(401).json('please supply both a username and password')
+  }
+
+
   /*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
@@ -51,7 +60,7 @@ router.post('/register', (req, res) => {
   */
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', validateExistingUser, (req, res) => {
   const { username, password } = req.body;
   const user = req.body
 
@@ -103,5 +112,11 @@ router.post('/login', (req, res) => {
 //       the response body should include a string exactly as follows: "invalid credentials".
 //   */
 // });
+
+
+
+
+
+
 
 module.exports = router;
