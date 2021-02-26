@@ -1,8 +1,9 @@
-
+const bcryptjs = require("bcryptjs");
 const Users = require('../users/users-model.js');
 const router = require('express').Router();
+const jwt = require("jsonwebtoken");
 // const restricted = require('../middleware/restricted.js')
-const validateExistingUser = require('../middleware/validate.js')
+// const validateExistingUser = require('../middleware/validate.js')
 
 
 
@@ -60,16 +61,23 @@ router.post('/register', (req, res) => {
   */
 });
 
-router.post('/login', validateExistingUser, (req, res) => {
+router.post('/login', (req, res) => {
   const { username, password } = req.body;
-  const user = req.body
+  
 
-  Users.findByUsername(user.username)
-  .then(u => {
-    res.status(200).json(u)
+  Users.findByUsername(username)
+
+  .then(([user]) => {
+    console.log(user)
+    if (user && password === user.password) {
+      const token = makeJwt(user)
+      res.status(200).json({message: "Welcome to the Dad Jokes API", token})
+    } else {
+      res.status(401).json({ message: "Invalid credentials" })
+    }
   })
   .catch(err => {
-    res.status(401).json(err.message)
+    res.status(500).json(err.message)
   })
 
 
@@ -114,7 +122,19 @@ router.post('/login', validateExistingUser, (req, res) => {
 // });
 
 
+function makeJwt(user) {
+  const payload = {
+    subject: user.id,
+    username: user.username
+  };
+  const secret = process.env.JWT_SECRET || 'shhh'
 
+  const options = {
+      expiresIn: "2h",
+  }
+  return jwt.sign(payload, secret, options)
+
+};
 
 
 
