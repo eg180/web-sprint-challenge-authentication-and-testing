@@ -2,15 +2,17 @@
 const Users = require('../users/users-model.js');
 
 module.exports = (req, res, next) => {
-  const { username, password } = req.body;
+  const credentials = req.body;
 
-  if (username && password) {
+  if (credentials.username && credentials.password) {
 
-    Users.findByUsername(username)
+    Users.findByUsername(credentials.username)
     .then((user) => {
+      
+      
 
-      if (req.body.username == user.username) {
-        res.status(401).json('username taken')
+      if (credentials.username === user.username) {
+        res.status(401).json({message: "username taken"})
       } else {
         next()
       }

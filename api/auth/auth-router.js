@@ -24,7 +24,7 @@ router.post('/register', checkIfTaken, (req, res) => {
   
   Users.add(user)
   .then(user => {
-    res.status(200).json({ user, message: "Welcome to the Dad Joke's API!" })
+    res.status(200).json({ user: user.username, password: user.password })
   })
   .catch(err => {
     res.status(401).json(err.message)
@@ -82,8 +82,23 @@ router.post('/login', (req, res) => {
     // console.log(bcrypt.compareSync(credentials.password, user.password))
     if (!user || !bcrypt.compareSync(credentials.password, user.password)) {
       return res.status(401).json({ error: "Nice try, hacker."})
-    } else {
+    } else if (!user.username){
+      res.status(401).json("Invalid credentials")
+    }
+    
+    else {
       const token = makeJwt(user)
+      const secret = process.env.JWT_SECRET || 'shhh'
+
+      jwt.verify(token, secret, (err, decodedToken) => {
+        if(err) {
+          console.log(err)
+          res.status(401).json({ error: "There was an error decoding token"})
+        } else {
+          console.log('token successfully created')
+          const token = req.headers.authorization;
+        }
+      })
       res.status(200).json({message: "Welcome to the Dad Jokes API", token})
     }
   })
@@ -139,6 +154,7 @@ function makeJwt(user) {
     username: user.username
   };
   const secret = process.env.JWT_SECRET || 'shhh'
+
 
   const options = {
       expiresIn: "2h",
