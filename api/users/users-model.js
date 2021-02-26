@@ -20,7 +20,6 @@ function getAll() {
 // }
 
 function findByUsername(username) {
-    console.log(`username received ${username}`)
     return db('users')
     .select("id", "username", "password")
     .where({ username });

@@ -1,4 +1,4 @@
-const jwt = require("jsonwebtoken")
+
 const Users = require('../users/users-model.js');
 
 module.exports = (req, res, next) => {
@@ -6,12 +6,11 @@ module.exports = (req, res, next) => {
   const user = req.body 
 
   Users.findByUsername(username)
-  if (req.username == res.username && req.password == res.password) {
-
-    console.log('a match was found')
-    next()
+  if (username) {
+    res.status(401).json("Username Taken")
   } else {
-    console.log('fix this')
+   next()
+  
   }
 
   // next();

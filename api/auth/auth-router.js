@@ -3,7 +3,7 @@ const Users = require('../users/users-model.js');
 const router = require('express').Router();
 const jwt = require("jsonwebtoken");
 // const restricted = require('../middleware/restricted.js')
-// const validateExistingUser = require('../middleware/validate.js')
+const checkIfTaken = require('../middleware/validate.js')
 
 
 
@@ -15,11 +15,11 @@ router.get('/users', (req, res) => {
   })
 });
 
-router.post('/register', (req, res) => {
+router.post('/register', checkIfTaken, (req, res) => {
   // res.end('implement register, please!');
   const { username, password } = req.body;
   const user = req.body;
-  console.log(user);
+  
 
   if (username && password) {
 
@@ -68,7 +68,7 @@ router.post('/login', (req, res) => {
   Users.findByUsername(username)
 
   .then(([user]) => {
-    console.log(user)
+
     if (user && password === user.password) {
       const token = makeJwt(user)
       res.status(200).json({message: "Welcome to the Dad Jokes API", token})
